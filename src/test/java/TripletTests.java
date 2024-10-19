@@ -13,6 +13,12 @@ public class TripletTests {
     private Deque<String> tQueue;
     private Containerable cQueue = (Containerable) tQueue;
 
+    @BeforeEach
+    void beforeEach() {
+        tQueue = new TripletDeque<>();
+        cQueue = (Containerable) tQueue;
+        tQueue.clear();
+    }
 
     @Test
     void addTest(){
@@ -285,10 +291,4 @@ public class TripletTests {
 
     }
 
-    @BeforeEach
-    void beforeEach() {
-        tQueue = new TripletDeque<>();
-        cQueue = (Containerable) tQueue;
-        tQueue.clear();
-    }
 }

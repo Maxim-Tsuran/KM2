@@ -23,7 +23,7 @@ public class TripletTests2 {
     }
 
     @Test
-    void addTestNew(){
+    void addTestNew() {
         tQueue.addLast("1");
         tQueue.addLast("2");
         tQueue.addLast("3");
@@ -36,7 +36,7 @@ public class TripletTests2 {
     }
 
     @Test
-    void addTest(){
+    void addTest() {
         tQueue.addFirst("one");
         tQueue.addFirst("two");
         assertEquals("two", tQueue.getFirst());
@@ -49,5 +49,64 @@ public class TripletTests2 {
         tQueue.addFirst("six");
         assertEquals("six", tQueue.getFirst());
         assertEquals("five", tQueue.getLast());
+    }
+
+    @Test
+    void removeTest() {
+        for (int i = 0; i < 15; i++) {
+            tQueue.addFirst("n_" + i);
+        }
+
+        Assertions.assertTrue(tQueue.contains("n_3"));
+        tQueue.remove("n_3");
+        Assertions.assertFalse(tQueue.contains("n_3"));
+    }
+
+    @Test
+    public void testIsEmptyAfterAddRemoveFirst() {
+        tQueue.addFirst("Something");
+        boolean empty = tQueue.isEmpty();
+        assertFalse( empty );
+        tQueue.removeFirst();
+
+        empty = tQueue.isEmpty();
+        assertTrue(empty);
+
+    }
+
+    @Test
+    public void testAddFirst() {
+        String[] aBunchOfString = {
+                "One",
+                "Two",
+                "Three",
+                "Four"
+        };
+
+        for(String aString : aBunchOfString){
+            tQueue.addFirst(aString);
+        }
+
+        for(int i = aBunchOfString.length - 1; i >= 0; i--){
+            assertEquals(aBunchOfString[i], tQueue.removeFirst());
+        }
+    }
+
+    @Test
+    public void testAddLast() {
+        String[] aBunchOfString = {
+                "One",
+                "Two",
+                "Three",
+                "Four"
+        };
+
+        for(String aString : aBunchOfString){
+            tQueue.addLast(aString);
+        }
+
+        for(int i = aBunchOfString.length - 1; i >= 0; i--){
+            assertEquals(aBunchOfString[i], tQueue.removeLast());
+        }
     }
 }
