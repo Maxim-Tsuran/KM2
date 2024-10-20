@@ -33,43 +33,50 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
     //объект данных добавляется в последний контейнер, в первую свободную ячейку слева.
     public void addLast(T element) {
 
-        if (size >= maxSize) {
-            throw new IllegalStateException("Превышен размер очереди");
-        }
+        if (element == null)
+            throw new NullPointerException("Попытка добавления null");
 
-        if (current_addLast == 0){
-            lastContainer.setLastElement(lastContainer.getLastElement() + 1);
-            // добавляем элемент
-            lastContainer.setArray(lastContainer.getLastElement(), element);
-            size++;
-            current_addFirst++;
+        if (size >= maxSize) {
+            throw new IndexOutOfBoundsException("Превышен размер очереди");
         }
-        else {
+        if (current_addLast == 0 && lastContainer.getLastElement() == 0){
+
+            lastContainer.setArray(0, element);
+            current_addLast++;
+        } else{
             // Если последний контейнер заполнен, добавляем новый контейнер и пере привязываем ссылки
-            if (lastContainer.getLastElement() - 1 == containerCapacity) {
+            if (lastContainer.getLastElement() >= containerCapacity - 1) {
                 Container<T> newContainer = new Container<>(containerCapacity);
                 newContainer.setPrev(lastContainer);
                 lastContainer.setNext(newContainer);
                 lastContainer = newContainer;
                 lastContainer.setLastElement(0);
             }
-            lastContainer.setArray(lastContainer.getLastElement(), element);
-            current_addFirst++;
-            size++;
+            if (size == 0 || lastContainer.getArray()[lastContainer.getLastElement()] == null){
+                lastContainer.setLastElement(0);
+                lastContainer.setArray(lastContainer.getLastElement(),element);
+
+            } else{
+                lastContainer.setArray(lastContainer.getLastElement() + 1, element);
+                lastContainer.setLastElement(lastContainer.getLastElement() + 1);
+                current_addLast++;
+            }
         }
 
-
+        size++;
     }
 
     @Override
     public void addFirst(T element) {
 
+        if (element == null)
+            throw new NullPointerException("Попытка добавления null");
         if (size >= maxSize) {
-            throw new IllegalStateException("Превышен размер очереди");
+            throw new IndexOutOfBoundsException("Превышен размер очереди");
         }
-        if (current_addFirst == 0){
+        if (current_addFirst == 0 ){
             firstContainer.setFirstElement(containerCapacity-1); // Новый контейнер начинается с конца
-            firstContainer.setLastElement(containerCapacity); // Новый контейнер начинается с конца
+            firstContainer.setLastElement(containerCapacity-1); // Новый контейнер начинается с конца
             // добавляем элемент
             firstContainer.setArray(firstContainer.getFirstElement(), element);
             size++;
@@ -83,6 +90,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
                 firstContainer.setPrev(newContainer);
                 firstContainer = newContainer;
                 firstContainer.setFirstElement(containerCapacity); // Новый контейнер начинается с конца
+                firstContainer.setLastElement(containerCapacity-1);
             }
             // Уменьшаем индекс firstElement и добавляем элемент
             firstContainer.setFirstElement(firstContainer.getFirstElement() - 1);
@@ -99,7 +107,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         try {
             addFirst(element);
             return true;
-        } catch (IllegalStateException e) {
+        } catch (IndexOutOfBoundsException e) {
             return false;
         }
     }
@@ -109,7 +117,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         try {
             addLast(element);
             return true;
-        } catch (IllegalStateException e) {
+        } catch (IndexOutOfBoundsException e) {
             return false;
         }
     }
@@ -129,7 +137,8 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         if (size == 0) {
             throw new NoSuchElementException("Очередь пуста");
         }
-        return pollLast();    }
+        return pollLast();
+    }
 
     @Override
     public T pollLast() {
@@ -137,10 +146,11 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         if (size == 0) {
             return null;
         }
-        T element = (T) lastContainer.getArray()[lastContainer.getLastElement()-1];
-        lastContainer.setArray(lastContainer.getLastElement()-1, null);
+        T element = (T) lastContainer.getArray()[lastContainer.getLastElement()];
+        lastContainer.setArray(lastContainer.getLastElement(), null);
 
-        if (lastContainer.getLastElement()-1 != 0){
+        if (lastContainer.getLastElement() != 0 &&
+                lastContainer.getArray()[lastContainer.getLastElement() - 1] != null){
             lastContainer.setLastElement(lastContainer.getLastElement()-1);
         }
         else{
@@ -150,6 +160,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
                 this.lastContainer = (Container<T>) prev;
                 this.lastContainer.setNext(null);
             }
+            lastContainer.setFirstElement(containerCapacity);
         }
         size--;
         return element;
@@ -160,11 +171,17 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         if (size == 0) {
             return null;
         }
+        if (firstContainer.getArray()[firstContainer.getFirstElement()] == null){
+            firstContainer.setFirstElement(0);
+        }
         T element = (T) firstContainer.getArray()[firstContainer.getFirstElement()];
         firstContainer.setArray(firstContainer.getFirstElement(), null);
 
-        if (firstContainer.getFirstElement() != containerCapacity - 1){
+        if (firstContainer.getFirstElement() != containerCapacity - 1 &&
+                firstContainer.getArray()[firstContainer.getFirstElement() + 1] != null) {
+
             firstContainer.setFirstElement(firstContainer.getFirstElement()+1);
+            firstContainer.setLastElement(firstContainer.getLastElement()-1);
         }
         else{
             if(firstContainer.getNext() != null){
@@ -173,6 +190,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
                 this.firstContainer = (Container<T>) next;
                 this.firstContainer.setPrev(null);
             }
+            firstContainer.setLastElement(0);
         }
         size--;
         return element;
@@ -180,24 +198,32 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
 
     @Override
     public T getFirst() {
-        T[] array = (T[]) firstContainer.getArray();
-        return array[firstContainer.getFirstElement()];
+        if (size == 0){
+            throw new NoSuchElementException("Элементов нет");
+        } else{
+            T[] array = (T[]) firstContainer.getArray();
+            return array[firstContainer.getFirstElement()];
+        }
     }
 
     @Override
     public T getLast() {
-        T[] array = (T[]) lastContainer.getArray();
-        return array[lastContainer.getLastElement()-1];
+        if (size == 0){
+            throw new NoSuchElementException("Элементов нет");
+        } else{
+            T[] array = (T[]) lastContainer.getArray();
+            return array[lastContainer.getLastElement()];
+        }
     }
 
     @Override
     public T peekFirst() {
-        return null;
+        return firstContainer.getArray()[firstContainer.getFirstElement()];
     }
 
     @Override
     public T peekLast() {
-        return null;
+        return lastContainer.getArray()[lastContainer.getLastElement()];
     }
 
     // Удаляем первое появление элемента слева. При удалении остальные элементы контейнера сдвигаются влево, чтобы не
@@ -209,16 +235,36 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
         while (current != null) {
             for (int i = 0; i < containerCapacity; i++) {
                 if (o.equals(current.getArray()[i])) {
+
                     for (int j = i; j < containerCapacity - 1; j++) {
                         current.getArray()[j] = current.getArray()[j+1];
                     }
-                    current.getArray()[current.getLastElement() - 1] = null;
+
+                    current.setArray(current.getLastElement(), null);
                     current.setLastElement(current.getLastElement() - 1);
                     size--;
+
+                    if (current.getLastElement() == -1){
+                        if (current == firstContainer) {
+                            firstContainer = current.getNext();
+                        }
+                        if (current == lastContainer) {
+                            lastContainer = current.getPrev();
+                        }
+
+                        if (current.getPrev() != null) {
+                            current.getPrev().setNext(current.getNext());
+                        }
+                        if (current.next != null) {
+                            current.getNext().setPrev(current.getPrev());
+                        };
+                    }
                     return true;
+
+//                    for (int k = 0, k < )
                 }
             }
-            current = current.next;
+            current = current.getNext();
         }
         return false;
     }
@@ -241,39 +287,39 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
                     return true;
                 }
             }
-            current = current.next;
+            current = current.getNext();
         }
         return false;
     }
 
     @Override
     public boolean add(T t) {
-        return false;
+        return offerLast(t);
     }
 
     @Override
     public boolean offer(T t) {
-        return false;
+        return offerLast(t);
     }
 
     @Override
     public T remove() {
-        return null;
+        return removeFirst();
     }
 
     @Override
     public T poll() {
-        return null;
+        return pollFirst();
     }
 
     @Override
     public T element() {
-        return null;
+        return getFirst();
     }
 
     @Override
     public T peek() {
-        return null;
+        return peekFirst();
     }
 
     @Override
@@ -349,8 +395,8 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
 
     @Override
     public Iterator<T> iterator() {
-
-        return null;
+        NewIterator iterator =new NewIterator (firstContainer, containerCapacity);
+        return iterator;
     }
 
     @Override
@@ -365,7 +411,7 @@ public class TripletDeque<T> implements Deque<T>, Containerable {
 
     @Override
     public Iterator<T> descendingIterator() {
-        return null;
+        throw new UnsupportedOperationException("Метод не реализован");
     }
 
     public Object[] getContainerByIndex(int cIndex) {

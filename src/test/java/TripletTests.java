@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.mpei.Containerable;
 import ru.mpei.TripletDeque;
 
+
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,6 +50,9 @@ public class TripletTests {
     void iterTest(){
         for (int i=0; i < 15 ;i++){
             tQueue.addFirst("n_"+i);
+//            Object[] cntr = cQueue.getContainerByIndex(0);
+//            System.out.println(Arrays.toString(cntr));
+
         }
 
         for (String s : tQueue) {
@@ -113,6 +117,9 @@ public class TripletTests {
             tQueue.addLast(aString);
         }
 
+//        Object[] cntr = cQueue.getContainerByIndex(0);
+//        System.out.println(Arrays.toString(cntr));
+
         for(int i = aBunchOfString.length - 1; i >= 0; i--){
             assertEquals(aBunchOfString[i], tQueue.removeLast());
         }
@@ -149,16 +156,27 @@ public class TripletTests {
 
         for(int i = 0; i < 100; i++){
             tQueue.addLast( String.valueOf(i) );
+//            Object[] cntr = cQueue.getContainerByIndex(0);
+//            System.out.println("Container "+i+" " + Arrays.toString(cntr));
+//            System.out.println( "удален "+tQueue.removeFirst());
             assertEquals(String.valueOf(i), tQueue.removeFirst());
         }
 
 
         for(int i = 0; i < 100; i++){
             tQueue.addLast( String.valueOf(i) );
+//            Object[] cntr = cQueue.getContainerByIndex(1);
+//            System.out.println("Container "+i+" " + Arrays.toString(cntr));
         }
 
+
         for(int i = 0; i < 100; i++){
+//            System.out.println("Удаляется элемент: " + tQueue.peekFirst());
+
             assertEquals(String.valueOf(i), tQueue.removeFirst());
+
+
+
         }
 
     }
@@ -167,6 +185,11 @@ public class TripletTests {
     public void testRemoveLast() {
         for(int i = 0; i < 100; i++){
             tQueue.addFirst( String.valueOf(i) );
+
+//            Object[] cntr = cQueue.getContainerByIndex(0);
+//            System.out.println("Container "+i+" " + Arrays.toString(cntr));
+//            System.out.println( "удален "+tQueue.removeLast());
+
             assertEquals(String.valueOf(i), tQueue.removeLast());
         }
 
@@ -275,6 +298,7 @@ public class TripletTests {
         Object[] cntr1 = cQueue.getContainerByIndex(1);
         Object[] cntr2 = cQueue.getContainerByIndex(2);
 
+
         Assertions.assertTrue(cntr!=null && cntr1 != null && cntr2 !=null);
 
         tQueue.remove("5");
@@ -288,7 +312,6 @@ public class TripletTests {
         cntr2 = cQueue.getContainerByIndex(2);
 
         Assertions.assertTrue(cntr!=null && cntr1 != null && cntr2 ==null);
-
     }
 
 }
